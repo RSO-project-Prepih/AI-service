@@ -1,0 +1,11 @@
+type Query {
+  fetchFamousPlaces: [Place]
+}
+
+type Place {
+  rate: Int
+  name: String
+  kinds: String
+  type: String
+  coordinates: [Float]
+}
