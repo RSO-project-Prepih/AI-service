@@ -23,7 +23,6 @@ import (
 // @version 1.0
 // @description This is a sample server for AI Service.
 // @BasePath /v1
-
 func main() {
 	log.Println("Starting the AI service...")
 	r := gin.Default()
