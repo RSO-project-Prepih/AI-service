@@ -1,0 +1,158 @@
+basePath: /v1
+definitions:
+  handlers.ImageProcessing:
+    properties:
+      image_id:
+        type: string
+      image_url:
+        type: string
+    type: object
+  handlers.Place:
+    properties:
+      geometry:
+        properties:
+          coordinates:
+            items:
+              type: number
+            type: array
+          type:
+            type: string
+        type: object
+      properties:
+        properties:
+          kinds:
+            type: string
+          name:
+            type: string
+          rate:
+            type: integer
+        type: object
+    type: object
+info:
+  contact: {}
+  description: This is a sample server for AI Service.
+  title: AI Service API
+  version: "1.0"
+paths:
+  /enhance-color:
+    post:
+      consumes:
+      - application/json
+      description: enhance the color of a given image
+      parameters:
+      - description: User ID
+        in: query
+        name: userID
+        required: true
+        type: string
+      - description: Image ID
+        in: query
+        name: imageID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Completed color enhancement
+          schema:
+            type: string
+      summary: Enhance image color
+      tags:
+      - images
+  /famous-places:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of famous places within a specified radius
+      parameters:
+      - description: Latitude
+        in: query
+        name: lat
+        required: true
+        type: integer
+      - description: Longitude
+        in: query
+        name: lon
+        required: true
+        type: integer
+      - description: Radius in meters
+        in: query
+        name: radius
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.Place'
+            type: array
+      summary: Fetch famous places
+      tags:
+      - places
+  /image-processing:
+    get:
+      consumes:
+      - application/json
+      description: Fetches data for images that have undergone processing
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.ImageProcessing'
+            type: array
+      summary: Retrieve processed images
+      tags:
+      - images
+  /live:
+    get:
+      consumes:
+      - application/json
+      description: get the health checks of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get get health checks
+      tags:
+      - health
+  /metrics:
+    get:
+      consumes:
+      - application/json
+      description: get the metrics of the service (prometheus)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get get metrics
+      tags:
+      - metrics
+  /ready:
+    get:
+      consumes:
+      - application/json
+      description: get the health checks of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get get health checks
+      tags:
+      - health
+swagger: "2.0"

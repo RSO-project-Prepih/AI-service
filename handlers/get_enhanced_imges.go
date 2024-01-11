@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/RSO-project-Prepih/AI-service/database"
+	_ "github.com/RSO-project-Prepih/AI-service/docs"
 )
 
 // ImageData is a struct to parse the data field.
@@ -20,6 +21,14 @@ type ImageProcessing struct {
 	ImageURL string `json:"image_url"`
 }
 
+// GetImageProcessingPhotos godoc
+// @Summary Retrieve processed images
+// @Description Fetches data for images that have undergone processing
+// @Tags images
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} ImageProcessing
+// @Router /image-processing [get]
 func GetImageProcessingPhotos() ([]ImageProcessing, error) {
 	log.Println("Fetching the images from processing data...")
 	db := database.NewDBConnection()

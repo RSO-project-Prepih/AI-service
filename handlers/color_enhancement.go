@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/RSO-project-Prepih/AI-service/database"
+	_ "github.com/RSO-project-Prepih/AI-service/docs"
 	"github.com/RSO-project-Prepih/AI-service/prometheus"
 	"github.com/nfnt/resize"
 )
@@ -97,6 +98,16 @@ func checkAndResizeImage(imageData []byte, maxResolution, maxFileSize uint) ([]b
 	return buf.Bytes(), nil
 }
 
+// PostColorEnhancementPhoto godoc
+// @Summary Enhance image color
+// @Description enhance the color of a given image
+// @Tags images
+// @Accept  json
+// @Produce  json
+// @Param userID query string true "User ID"
+// @Param imageID query string true "Image ID"
+// @Success 200 {object} string "Completed color enhancement"
+// @Router /enhance-color [post]
 func PostColorEnhancementPhoto(userID, imageID string) {
 
 	starteTime := time.Now()

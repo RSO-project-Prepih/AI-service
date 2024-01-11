@@ -9,12 +9,20 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/RSO-project-Prepih/AI-service/docs"
 	"github.com/RSO-project-Prepih/AI-service/handlers"
 	"github.com/RSO-project-Prepih/AI-service/health"
 	"github.com/RSO-project-Prepih/AI-service/prometheus"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/cors"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// @title AI Service API
+// @version 1.0
+// @description This is a sample server for AI Service.
+// @BasePath /v1
 
 func main() {
 	log.Println("Starting the AI service...")
@@ -84,6 +92,10 @@ func main() {
 	// Define the routes for the metrics
 	r.GET("/metrics", gin.WrapH(prometheus.GetMetrics()))
 
+	// Define the routes for the swagger
+	r.GET("/openapi/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Start the server
 	srver := &http.Server{
 		Addr:    ":8080",
 		Handler: r,

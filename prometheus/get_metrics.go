@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	_ "github.com/RSO-project-Prepih/AI-service/docs"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -33,6 +34,14 @@ var (
 	)
 )
 
+// GetMetrics godoc
+// @Summary Get get metrics
+// @Description get the metrics of the service (prometheus)
+// @Tags metrics
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} string
+// @Router /metrics [get]
 func GetMetrics() http.Handler {
 	log.Println("Starting the prometheus metrics...")
 	prometheus.MustRegister(DBConnectionAttempts)

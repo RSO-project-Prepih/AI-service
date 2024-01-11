@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/RSO-project-Prepih/AI-service/docs"
 	"github.com/RSO-project-Prepih/AI-service/prometheus"
 )
 
@@ -33,6 +34,17 @@ type ResponseData struct {
 	Features []Place `json:"features"`
 }
 
+// FetchFamousPlaces godoc
+// @Summary Fetch famous places
+// @Description Retrieves a list of famous places within a specified radius
+// @Tags places
+// @Accept  json
+// @Produce  json
+// @Param lat query int true "Latitude"
+// @Param lon query int true "Longitude"
+// @Param radius query int true "Radius in meters"
+// @Success 200 {array} Place
+// @Router /famous-places [get]
 func FetchFamousPlaces() ([]Place, error) {
 	startTime := time.Now()
 
