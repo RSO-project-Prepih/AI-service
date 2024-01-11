@@ -47,7 +47,6 @@ func main() {
 	})
 
 	// Define the routes for the color enhancement
-
 	r.POST("/enhance-color", func(c *gin.Context) {
 		log.Println("Starting color enhancement...")
 		// Extract user ID and image ID from request
@@ -62,6 +61,19 @@ func main() {
 
 		handlers.PostColorEnhancementPhoto(userID, imageID)
 		c.JSON(http.StatusOK, gin.H{"message": "Completed color enhancement"})
+	})
+
+	// Define the fetching of images that are enhancement
+	r.GET("/image-processing", func(c *gin.Context) {
+		log.Println("Fetching image processing data...")
+		imageProcessingData, err := handlers.GetImageProcessingPhotos()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			log.Println("Error fetching image processing data:", err)
+			return
+		}
+		log.Println("Image processing data fetched successfully")
+		c.JSON(http.StatusOK, imageProcessingData)
 	})
 
 	// Define the routes for the health check
