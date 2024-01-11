@@ -10,5 +10,9 @@ http://localhost:8080/famous-places
 ```
 http://localhost:8080/enhance-color?userID=<your-user-id>&imageID=<your-image-id>
 ```
+3. To get all the images form the database that where edit you need to send a GET request to the following endpoint:
+```
+http://localhost:8080/image-processing
+```
 
 ## Installation
