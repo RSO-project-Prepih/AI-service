@@ -11,3 +11,4 @@ http://localhost:8080/famous-places
 http://localhost:8080/enhance-color?userID=<your-user-id>&imageID=<your-image-id>
 ```
 
+## Installation
