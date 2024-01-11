@@ -2,17 +2,22 @@ package handlers
 
 import (
 	"bytes"
+	"image"
+	"image/jpeg"
 	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/RSO-project-Prepih/AI-service/database"
+	"github.com/RSO-project-Prepih/AI-service/prometheus"
+	"github.com/nfnt/resize"
 )
 
-// FetchImageData gets image data from the database
 func FetchImageData(userID, imageID string) ([]byte, error) {
+
 	db := database.NewDBConnection()
 	defer db.Close()
 
@@ -27,16 +32,14 @@ func FetchImageData(userID, imageID string) ([]byte, error) {
 	return imageData, nil
 }
 
-// saveProcessedImage saves the processed image data in the imageprocessing table
 func saveProcessedImage(userID, originalImageID string, processedImageData []byte) {
 	db := database.NewDBConnection()
 	defer db.Close()
 
 	newImageID := originalImageID
-	// Define the processing service type
+
 	processingServiceType := "ColorEnhancement"
 
-	// Insert the processed image data into the imageprocessing table
 	query := "INSERT INTO imageprocessing (image_id, processing_service_type, data) VALUES ($1, $2, $3)"
 	_, err := db.Exec(query, newImageID, processingServiceType, processedImageData)
 	if err != nil {
@@ -45,13 +48,76 @@ func saveProcessedImage(userID, originalImageID string, processedImageData []byt
 	}
 }
 
+const maxFileSize = 8 * 1024 * 1024 // 8 MB
+
+func checkAndResizeImage(imageData []byte, maxResolution, maxFileSize uint) ([]byte, error) {
+	log.Println("Checking image size...")
+	img, _, err := image.Decode(bytes.NewReader(imageData))
+	if err != nil {
+		log.Println("Error decoding image:", err)
+		return nil, err
+	}
+
+	bounds := img.Bounds()
+	width := uint(bounds.Dx())
+	height := uint(bounds.Dy())
+	log.Println("Image size:", width, "x", height)
+
+	// Resize if resolution is too high
+	if width > maxResolution || height > maxResolution {
+		log.Println("Resizing image...")
+		img = resize.Thumbnail(maxResolution, maxResolution, img, resize.Lanczos3)
+	}
+
+	// Encode the image to check the file size
+	buf := new(bytes.Buffer)
+	err = jpeg.Encode(buf, img, &jpeg.Options{Quality: 75}) // Start with a default quality
+	if err != nil {
+		log.Println("Error encoding image:", err)
+		return nil, err
+	}
+
+	// If the file size is too large, reduce quality
+	for buf.Len() > int(maxFileSize) {
+		log.Println("Reducing image quality...")
+		buf.Reset()
+		quality := 75 * int(maxFileSize) / buf.Len() // Reduce quality proportional to excess size
+		if quality < 10 {
+			log.Println("Error reducing image quality: quality too low")
+			quality = 10 // Set a minimum quality to prevent too much degradation
+		}
+		err = jpeg.Encode(buf, img, &jpeg.Options{Quality: quality})
+		if err != nil {
+			log.Println("Error encoding image:", err)
+			return nil, err
+		}
+	}
+
+	log.Println("Image size after processing:", buf.Len(), "bytes")
+	return buf.Bytes(), nil
+}
+
 func PostColorEnhancementPhoto(userID, imageID string) {
+
+	starteTime := time.Now()
+
 	url := "https://www.ailabapi.com/api/image/enhance/image-color-enhancement"
 	method := "POST"
 
+	log.Println("Fetching image data...")
 	imageData, err := FetchImageData(userID, imageID)
 	if err != nil {
 		log.Println("Error fetching image data:", err)
+		return
+	}
+
+	log.Println("Image data fetched successfully")
+
+	log.Println("Resizing image...")
+	maxResolution := uint(3000)
+	imageDataResize, err := checkAndResizeImage(imageData, maxResolution, maxFileSize)
+	if err != nil {
+		log.Println("Error processing image:", err)
 		return
 	}
 
@@ -63,7 +129,7 @@ func PostColorEnhancementPhoto(userID, imageID string) {
 		return
 	}
 
-	_, err = part.Write(imageData)
+	_, err = part.Write(imageDataResize)
 	if err != nil {
 		log.Println("Error writing image data to form:", err)
 		return
@@ -107,4 +173,7 @@ func PostColorEnhancementPhoto(userID, imageID string) {
 	log.Println("Processed image data:", string(processedImageData))
 
 	saveProcessedImage(userID, imageID, processedImageData)
+
+	duration := time.Since(starteTime)
+	prometheus.HTTPRequestDuration.WithLabelValues("/uploadphoto").Observe(duration.Seconds())
 }

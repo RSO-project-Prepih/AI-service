@@ -7,8 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/joho/godotenv"
+	"github.com/RSO-project-Prepih/AI-service/prometheus"
 )
 
 type Coordinates struct {
@@ -33,12 +34,7 @@ type ResponseData struct {
 }
 
 func FetchFamousPlaces() ([]Place, error) {
-
-	//odstrani ta shit
-	if err := godotenv.Load(); err != nil {
-		log.Printf("Error loading .env file: %s", err)
-		return nil, err
-	}
+	startTime := time.Now()
 
 	apiKey := os.Getenv("OPENTRIPMAP_API_KEY")
 	if apiKey == "" {
@@ -87,6 +83,9 @@ func FetchFamousPlaces() ([]Place, error) {
 			popularPlaces = append(popularPlaces, place)
 		}
 	}
+
+	duration := time.Since(startTime)
+	prometheus.HTTPRequestDuration.WithLabelValues("opentripmap").Observe(duration.Seconds())
 
 	return popularPlaces, nil
 }

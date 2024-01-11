@@ -18,7 +18,6 @@ func logFatal(err error) {
 }
 
 func NewDBConnection() *sql.DB {
-	// Load .env file for environment variables
 
 	pgURL := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=verify-full",

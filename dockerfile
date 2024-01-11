@@ -1,29 +1,29 @@
-# Use official Golang image
+# Use official Golang image for building the binary
 FROM golang:1.21.3 as builder
 
-# Set working directory
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy the source code
+# Copy the source code into the container
 COPY . .
 
-# Download and install the dependencies
+# Download dependencies
 RUN go mod download
 
-# Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -o server .
+# Build the Go application
+RUN CGO_ENABLED=0 GOOS=linux go build -o ai-service .
 
-# Use Alpine for the final image
+# Use Alpine for the runtime image
 FROM alpine:latest
 
-# Add CA certificates
+# Add CA certificates for HTTPS
 RUN apk --no-cache add ca-certificates
 
 # Copy the built binary from the builder stage
-COPY --from=builder /app/server /server
+COPY --from=builder /app/ai-service /ai-service
 
-# Expose the port the app runs on
+# Expose the port that your app listens on
 EXPOSE 8080
 
-# Run the server
-CMD ["/server"]
+# Run the binary
+CMD ["/ai-service"]
